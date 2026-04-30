@@ -1,2 +1,2 @@
 # Geographie
-Géographie Jeu Cm2 , voir les 2 readme presents dans ce dossier
+Géographie Jeu Cm2 , [se trouve a cette adresse : https://eka-dev5.github.io/Geographie/ voir les 2 fichiers readme dans ce dossier ]
