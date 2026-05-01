@@ -169,6 +169,12 @@
        🔝 TITRE — Personnaliser l'emoji et le nom
        ════════════════════════════════════════════════════ -->
   <h1>🌍 Mon Espace Géographie Master</h1>
+  <div class="player-header no-print" style="background: #f8f9fa; padding: 15px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #e2e8f0;">
+  <input type="text" id="newPlayerName" placeholder="Nom du nouveau joueur" 
+         style="padding: 10px; border-radius: 8px; border: 1px solid #ccc; flex: 1; min-width: 200px;">
+  <button class="btn btn-primary" onclick="addPlayer()">➕ Créer un joueur</button>
+</div>
+
   <div class="subtitle">Tous tes progrès, badges et révisions en un coup d'œil</div>
 
 
@@ -645,6 +651,45 @@
      🚀 INITIALISATION
      ══════════════════════════════════════════════════════ */
   document.addEventListener("DOMContentLoaded", () => { loadPlayerList(); });
+/* ══════════════════════════════════════════════════════
+   🆕 AJOUTER UN JOUEUR
+   ══════════════════════════════════════════════════════ */
+function addPlayer() {
+  const nameInput = document.getElementById('newPlayerName');
+  const name = nameInput.value.trim();
+  
+  if (!name) {
+    alert("Merci d'entrer un nom !");
+    return;
+  }
+
+  const players = getPlayers();
+  if (players[name]) {
+    alert("Ce joueur existe déjà !");
+    return;
+  }
+
+  // Création du profil avec les mêmes statistiques que l'Histoire
+  players[name] = {
+    name: name,
+    currentLevel: 1,
+    score: 0,
+    completed: [],
+    totalQuestions: 0,
+    totalCorrect: 0,
+    streak: 0,
+    lastPlayed: new Date().toISOString(),
+    errorHistory: [],
+    sessionHistory: [],
+    cameleonHelped: 0
+  };
+
+  savePlayers(players);
+  nameInput.value = ''; // Vide le champ
+  loadPlayerList();     // Rafraîchit la liste
+  loadPlayer(name);     // Sélectionne le nouveau joueur
+  alert("Joueur " + name + " créé avec succès !");
+}
 
 </script>
 </body>
