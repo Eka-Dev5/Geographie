@@ -1,196 +1,574 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Géographie Master 🌍</title>
-<style>
-/* ═══════════════════════════════════════════
-   🎨 IDENTITÉ VISUELLE GÉOGRAPHIE
-   ═══════════════════════════════════════════ */
-:root {
-  --primary:#27ae60; --secondary:#229954; --success:#48bb78;
-  --error:#f56565; --warning:#ed8936; --bg:#f7fafc; --text:#2d3748;
-  --shadow:0 10px 30px rgba(0,0,0,0.15);
-}
-*{box-sizing:border-box;margin:0;padding:0;font-family:"Segoe UI",system-ui,sans-serif}
-body{background:linear-gradient(135deg,var(--primary),var(--secondary));min-height:100vh;padding:15px}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Géographie Master | Le Jeu</title>
+    <style>
+        :root {
+            --primary: #27ae60;
+            --secondary: #2ecc71;
+            --dark: #2d3436;
+            --light: #f9f9f9;
+            --error: #e74c3c;
+            --shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
 
-/* MISE EN PAGE IDENTIQUE À TON MODÈLE */
-.quiz-container{background:white;width:100%;max-width:820px;margin:0 auto;border-radius:20px;padding:25px;box-shadow:var(--shadow)}
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:15px;border-bottom:2px solid #f0f2f5}
-.btn{padding:10px 22px;border:none;border-radius:12px;cursor:pointer;font-weight:700;transition:all .2s;display:inline-flex;align-items:center;gap:8px}
-.btn-primary{background:var(--primary);color:white}
-.option-btn{width:100%;text-align:left;padding:16px 20px;margin-bottom:12px;border:2px solid #edf2f7;border-radius:15px;background:white;font-size:1.05em;cursor:pointer}
-.option-btn:hover{border-color:var(--primary);background:#f0fff4}
-.lesson-card{background:#f0fff4;border-left:5px solid var(--primary);padding:20px;border-radius:12px;margin-bottom:25px;line-height:1.6}
-</style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3799, #27ae60);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: var(--dark);
+        }
+
+        .container {
+            background: white;
+            width: 100%;
+            max-width: 800px;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .header {
+            border-bottom: 3px solid var(--primary);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: #219150; transform: translateY(-2px); }
+
+        .level-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .level-card {
+            background: var(--light);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid #ddd;
+            cursor: pointer;
+        }
+
+        .level-card.locked { opacity: 0.6; cursor: not-allowed; background: #eee; }
+        .level-card.active { border-color: var(--primary); background: #eafff0; }
+
+        .option {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #dfe6e9;
+            border-radius: 10px;
+            background: white;
+            text-align: left;
+            cursor: pointer;
+            font-size: 1.1em;
+        }
+
+        .option:hover { border-color: var(--primary); background: #f0fff4; }
+        #timer { font-weight: bold; color: var(--error); font-size: 1.2em; }
+
+        .input-libre {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+    </style>
 </head>
 <body>
 
-<div class="quiz-container">
-  <div class="header">
-    <div>
-      <h1>🌍 Géographie Master</h1>
-      <div style="color:var(--secondary); font-weight:bold; font-size:0.9em">👤 Joueur : <span id="playerNameDisplay">-</span></div>
-    </div>
-    <button class="btn btn-primary" onclick="window.location.href='dashboard.html'">📊 Stats</button>
-  </div>
+<div class="container">
+    <div id="main-menu">
+        <div class="header">
+            <h1>🌍 Géographie Master</h1>
+            <div id="player-info">Joueur: <strong id="current-player-name">---</strong></div>
+        </div>
+        
+        <div class="lesson-box" id="lesson-display" style="background:#f0f7ff; padding:20px; border-radius:15px; margin-bottom:20px; display:none;">
+            <h3 id="lesson-title" style="color:var(--primary)"></h3>
+            <p id="lesson-text" style="margin:10px 0; line-height:1.5"></p>
+            <button class="btn btn-primary" onclick="startQuiz()">Lancer le Quiz (10 questions)</button>
+        </div>
 
-  <div id="setup-screen">
-    <div class="lesson-card" id="lesson-box">
-      <h2 id="lesson-title" style="color:var(--primary)">Chargement...</h2>
-      <div id="lesson-content" style="margin-top:10px"></div>
+        <h3>Choisissez votre niveau :</h3>
+        <div class="level-grid" id="levels-container"></div>
     </div>
-    <div id="level-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px,1fr)); gap:15px"></div>
-  </div>
 
-  <div id="quiz-screen" style="display:none">
-    <div style="display:flex; justify-content:space-between; margin-bottom:15px">
-      <span id="progress-text" style="font-weight:bold; color:var(--primary)"></span>
-      <span id="timer-text" style="color:var(--error); font-weight:bold">⏳ 20s</span>
+    <div id="quiz-zone" style="display:none;">
+        <div class="header">
+            <span id="progress">Question 1/10</span>
+            <span id="timer">⏳ 20s</span>
+        </div>
+        <h2 id="question-text" style="margin-bottom:25px;"></h2>
+        <div id="options-list"></div>
+        <div id="libre-zone" style="display:none;">
+            <input type="text" id="answer-input" class="input-libre" placeholder="Tape ta réponse ici...">
+            <button class="btn btn-primary" onclick="checkLibre()">Valider</button>
+        </div>
     </div>
-    <h2 id="question-text" style="margin-bottom:20px"></h2>
-    <div id="options-container"></div>
-  </div>
 
-  <div id="result-screen" style="display:none; text-align:center">
-    <h2 id="result-title" style="font-size:2em">Résultat</h2>
-    <div id="result-score" style="font-size:4em; font-weight:900; color:var(--primary)">0/0</div>
-    <p id="result-msg" style="margin:20px 0"></p>
-    <button class="btn btn-primary" onclick="location.reload()">🏠 Retour</button>
-  </div>
+    <div id="result-screen" style="display:none; text-align:center;">
+        <h2 id="result-status">Bravo !</h2>
+        <div style="font-size: 4em; margin: 20px 0;" id="final-score">0/10</div>
+        <button class="btn btn-primary" onclick="location.reload()">Retour au menu</button>
+    </div>
 </div>
 
 <script>
-/* ═══════════════════════════════════════════════════════════════════
-   🎯 INJECTION DE TON BLOC GÉOGRAPHIE COMPLET (200 QUESTIONS)
-   ═══════════════════════════════════════════════════════════════════ */
-
-const SUBJECT_CONFIG = {
-  storageKey: 'geoMaster_v1',
-  playersKey: 'geoMaster_players',
-  subjectName: 'Géographie Master'
-};
-
-// Ici, j'injecte les leçons de ton fichier geo_master_bloc_complet.js
-const LESSONS_DATA = {
-  1: { title: "Niveau 1 : La France - Territoire et Population", content: "La France est le pays le plus vaste de l'Union européenne... (etc)" },
-  2: { title: "Niveau 2 : Milieux, Reliefs et Climats", content: "Le territoire français est marqué par une grande diversité de reliefs... (etc)" },
-  3: { title: "Niveau 3 : Aménager le territoire", content: "Aménager le territoire, c'est réduire les inégalités entre les régions... (etc)" },
-  4: { title: "Niveau 4 : La France dans l'Union Européenne", content: "La France est un membre fondateur de l'UE... (etc)" },
-  5: { title: "Niveau 5 : La France et le Monde", content: "La France dispose du 2ème domaine maritime mondial... (etc)" }
-};
-
-// C'est ici que tes 200 questions de ton fichier JS sont placées
-// (Je ne mets que le début pour l'exemple, mais tu dois y coller tout ton tableau QUESTIONS_DB_GEO)
-const QUESTIONS_DATA = [
-    { level: 1, question: "Quel est le pays le plus vaste de l'Union européenne ?", options: ["Allemagne", "France", "Espagne", "Suède"], answer: "France", explanation: "Avec 550 000 km², la France métropolitaine est le plus grand pays de l'UE." },
-    // ... COLLE ICI TOUTES LES QUESTIONS DE TON FICHIER geo_master_bloc_complet.js ...
-];
-
-/* ═══════════════════════════════════════════
-   🚀 MOTEUR TECHNIQUE (TEMPLATE HISTOIRE)
-   ═══════════════════════════════════════════ */
-let currentPlayerName = "";
-let currentLevel = 0;
-let score = 0;
-let qIdx = 0;
-let sessionQuestions = [];
-
-function getPlayers() { return JSON.parse(localStorage.getItem(SUBJECT_CONFIG.playersKey)) || {}; }
-function savePlayers(p) { localStorage.setItem(SUBJECT_CONFIG.playersKey, JSON.stringify(p)); }
-
-function init() {
-  const players = getPlayers();
-  const params = new URLSearchParams(window.location.search);
-  const urlPlayer = params.get('player');
-
-  // Système de gestion des joueurs identique à Histoire
-  if (urlPlayer && players[urlPlayer]) {
-    currentPlayerName = urlPlayer;
-  } else {
-    const names = Object.keys(players);
-    if (names.length > 0) {
-      currentPlayerName = names[0];
-    } else {
-      currentPlayerName = "Joueur 1";
-      players[currentPlayerName] = { name: "Joueur 1", currentLevel: 1, score: 0, completed: [], totalQuestions: 0, totalCorrect: 0, streak: 0, errorHistory: [] };
-      savePlayers(players);
+/* ===========================================================
+   📦 INJECTION DES DONNÉES (200 Questions)
+   ===========================================================
+*/
+const SUBJECT_DATA = {
+    config: { storageKey: 'geoMaster_players', levelsCount: 5 },
+    lessons: {
+        1: { t: "La France : Territoire et Population", c: "La France métropolitaine compte 13 régions. Le Mont Blanc (4808m) est son sommet. C'est le plus grand pays de l'UE." },
+        2: { t: "L'Europe : Pays et Climats", c: "L'UE compte 27 pays. Les climats varient entre océanique à l'Ouest et méditerranéen au Sud." },
+        3: { t: "Le Monde : Continents et Océans", c: "L'Asie est le plus grand continent. L'Océan Pacifique est le plus vaste du monde." },
+        4: { t: "Développement & Inégalités", c: "L'IDH mesure la santé et l'éducation. Les BRICS sont les grands pays émergents." },
+        5: { t: "Enjeux Environnementaux", c: "Le réchauffement climatique est causé par le CO2. 2,2 milliards de personnes manquent d'eau potable." }
     }
-  }
-  document.getElementById('playerNameDisplay').textContent = currentPlayerName;
-  renderLevels();
+};
+
+const RAW_QUESTIONS = {
+    1: [
+        {q: "Combien de régions compte la France métropolitaine depuis 2016 ?", options: ["13", "18", "22", "26"], correct: "13"},
+        {q: "Quel est le point culminant de la France métropolitaine ?", options: ["Pic du Midi", "Mont Blanc", "Puy de Sancy", "Jura"], correct: "Mont Blanc"},
+        {q: "Quel massif montagneux sépare la France de l'Espagne ?", options: ["Les Alpes", "Les Vosges", "Les Pyrénées", "Le Jura"], correct: "Les Pyrénées"},
+        {q: "Quel est le plus long fleuve de France ?", options: ["Le Rhône", "La Seine", "La Loire", "La Garonne"], correct: "La Loire"},
+        {q: "Le fleuve qui traverse Paris est la ___.", answer: "Seine"},
+        {q: "Le Mont Blanc culmine à ___ mètres.", answer: "4808"},
+        {q: "Le plus grand département français est la ___.", answer: "Guyane"}
+        // ... (J'ai inclus la logique pour traiter tes 2 types de questions)
+    ],
+    // Les autres niveaux suivent la même structure simplifiée pour le moteur
+};
+
+/* ===========================================================
+   ⚙️ LOGIQUE TECHNIQUE
+   ===========================================================
+*/
+
+// On transforme ton bloc massif en liste plate pour le moteur
+let allQuestions = [];
+
+// Fonction pour intégrer ton bloc QUESTIONS_DB_GEO dans le moteur
+function processQuestions() {
+    // Note : Ici j'utilise une version simplifiée de tes données pour l'exemple
+    // Dans ton fichier réel, cette fonction bouclerait sur QUESTIONS_DB_GEO
+    const levels = [1,2,3,4,5];
+    levels.forEach(lvl => {
+        // Ajout des QCM
+        const data = QUESTIONS_DB_GEO[lvl];
+        data.qcm.forEach(q => allQuestions.push({level: lvl, type: 'qcm', question: q.q, options: q.options, answer: q.correct}));
+        // Ajout des Libres
+        data.libre.forEach(q => allQuestions.push({level: lvl, type: 'libre', question: q.q, answer: q.answer, alt: q.alternatives}));
+    });
+}
+
+// COPIER ICI TON BLOC QUESTIONS_DB_GEO COMPLET
+const QUESTIONS_DB_GEO = {
+    1: {
+        qcm: [
+            {q: "Combien de régions compte la France métropolitaine depuis 2016 ?", options: ["13", "18", "22", "26"], correct: "13"},
+            {q: "Quelle est la superficie totale de la France ?", options: ["551 000 km²", "643 801 km²", "675 000 km²", "720 000 km²"], correct: "643 801 km²"},
+            {q: "Quel est le point culminant de la France métropolitaine ?", options: ["Mont Pelvoux", "Pic du Midi", "Mont Blanc", "Puy de Sancy"], correct: "Mont Blanc"},
+            {q: "Quelle est l'altitude du Mont Blanc ?", options: ["4 105 m", "4 808 m", "5 102 m", "3 900 m"], correct: "4 808 m"},
+            {q: "Quel massif montagneux sépare la France de l'Espagne ?", options: ["Les Alpes", "Les Vosges", "Les Pyrénées", "Le Jura"], correct: "Les Pyrénées"},
+            {q: "Quel est le plus long fleuve de France ?", options: ["Le Rhône", "La Seine", "La Loire", "Le Rhin"], correct: "La Loire"},
+            {q: "Quel fleuve français a le débit le plus puissant ?", options: ["La Loire", "La Seine", "Le Rhône", "La Garonne"], correct: "Le Rhône"},
+            {q: "Quel fleuve traverse Paris ?", options: ["La Loire", "Le Rhône", "La Seine", "La Marne"], correct: "La Seine"},
+            {q: "Quel fleuve se jette dans la Méditerranée ?", options: ["La Loire", "Le Rhône", "La Seine", "La Garonne"], correct: "Le Rhône"},
+            {q: "Quel est le plus grand département français ?", options: ["Nord", "Gironde", "Guyane", "Paris"], correct: "Guyane"},
+            {q: "Quelle région française est connue pour ses châteaux ?", options: ["Bretagne", "Alsace", "Centre-Val de Loire", "Provence"], correct: "Centre-Val de Loire"},
+            {q: "Quel volcan français est encore en activité ?", options: ["Puy de Dôme", "Montagne Pelée", "Piton de la Fournaise", "Vesuve"], correct: "Piton de la Fournaise"},
+            {q: "Quel est le plus haut sommet du Massif central ?", options: ["Puy de Dôme", "Mont Aigoual", "Puy de Sancy", "Mont Lozère"], correct: "Puy de Sancy"},
+            {q: "Quelle mer borde la côte méditerranéenne ?", options: ["Mer du Nord", "Manche", "Mer Méditerranée", "Océan Atlantique"], correct: "Mer Méditerranée"},
+            {q: "Quel département français est une île en Méditerranée ?", options: ["Haute-Corse", "Var", "Pyrénées-Orientales", "Alpes-Maritimes"], correct: "Haute-Corse"},
+            {q: "Quelle chaîne de montagnes borde l'Alsace ?", options: ["Les Alpes", "Les Pyrénées", "Les Vosges", "Le Jura"], correct: "Les Vosges"},
+            {q: "Quel fleuve forme la frontière France-Allemagne ?", options: ["La Meuse", "Le Rhin", "La Moselle", "La Sarre"], correct: "Le Rhin"},
+            {q: "Quelle est la région la plus peuplée ?", options: ["Île-de-France", "Auvergne-Rhône-Alpes", "Hauts-de-France", "Nouvelle-Aquitaine"], correct: "Île-de-France"},
+            {q: "Quel est le plus petit département français ?", options: ["Paris", "Hauts-de-Seine", "Seine-Saint-Denis", "Val-de-Marne"], correct: "Paris"},
+            {q: "Quel océan borde la côte ouest ?", options: ["Océan Indien", "Océan Pacifique", "Océan Atlantique", "Mer du Nord"], correct: "Océan Atlantique"}
+        ],
+        libre: [
+            {q: "La France métropolitaine compte ___ régions depuis 2016.", answer: "13", alternatives: ["treize"]},
+            {q: "Le Mont Blanc culmine à ___ mètres.", answer: "4808", alternatives: ["4 808"]},
+            {q: "Les ___ séparent la France de l'Espagne.", answer: "Pyrénées", alternatives: ["pyrénées"]},
+            {q: "Le plus long fleuve de France est la ___.", answer: "Loire", alternatives: ["loire"]},
+            {q: "Le fleuve avec le débit le plus puissant est le ___.", answer: "Rhône", alternatives: ["rhône"]},
+            {q: "Le fleuve qui traverse Paris est la ___.", answer: "Seine", alternatives: ["seine"]},
+            {q: "Le fleuve qui se jette dans la Méditerranée est le ___.", answer: "Rhône", alternatives: ["rhône"]},
+            {q: "Le plus grand département français est la ___.", answer: "Guyane", alternatives: ["guyane"]},
+            {q: "Le volcan actif de La Réunion est le Piton de la ___.", answer: "Fournaise", alternatives: ["fournaise"]},
+            {q: "Le sommet du Massif central est le Puy de ___.", answer: "Sancy", alternatives: ["sancy"]},
+            {q: "La mer qui borde la Côte d'Azur est la ___.", answer: "Méditerranée", alternatives: ["méditerranée"]},
+            {q: "La Corse est divisée en Haute-Corse et Corse-du-___.", answer: "Sud", alternatives: ["sud"]},
+            {q: "Les ___ séparent l'Alsace de la Lorraine.", answer: "Vosges", alternatives: ["vosges"]},
+            {q: "Le ___ forme la frontière France-Allemagne.", answer: "Rhin", alternatives: ["rhin"]},
+            {q: "La région la plus peuplée est l'___-de-France.", answer: "Île", alternatives: ["île"]},
+            {q: "Le plus petit département est ___.", answer: "Paris", alternatives: ["paris"]},
+            {q: "L'océan à l'ouest est l'océan ___.", answer: "Atlantique", alternatives: ["atlantique"]},
+            {q: "La ___ est la plus vaste région de métropole.", answer: "Nouvelle-Aquitaine", alternatives: ["nouvelle-aquitaine"]},
+            {q: "Le département en Amérique du Sud est la ___.", answer: "Guyane", alternatives: ["guyane"]},
+            {q: "La ville de Strasbourg est sur le ___.", answer: "Rhin", alternatives: ["rhin"]}
+        ]
+    },
+    2: {
+        qcm: [
+            {q: "Combien de pays compte l'UE depuis le Brexit ?", options: ["25", "26", "27", "28"], correct: "27"},
+            {q: "Quelle est la capitale de l'Allemagne ?", options: ["Munich", "Berlin", "Hambourg", "Bonn"], correct: "Berlin"},
+            {q: "Quel fleuve traverse Vienne et Budapest ?", options: ["Le Danube", "Le Rhin", "L'Elbe", "La Volga"], correct: "Le Danube"},
+            {q: "Quel pays a quitté l'UE en 2020 ?", options: ["Irlande", "Suède", "Royaume-Uni", "Norvège"], correct: "Royaume-Uni"},
+            {q: "Quelle chaîne de montagnes sépare l'Europe de l'Asie ?", options: ["Alpes", "Oural", "Carpates", "Himalaya"], correct: "Oural"},
+            {q: "Quel climat caractérise le Sud de l'Europe ?", options: ["Océanique", "Polaire", "Méditerranéen", "Tropical"], correct: "Méditerranéen"},
+            {q: "Quel pays européen n'utilise pas l'euro ?", options: ["France", "Pologne", "Italie", "Espagne"], correct: "Pologne"},
+            {q: "Quel est le plus grand pays entièrement en Europe ?", options: ["France", "Ukraine", "Espagne", "Suède"], correct: "Ukraine"},
+            {q: "Quelle ville est le siège de la Commission européenne ?", options: ["Paris", "Bruxelles", "Strasbourg", "Berlin"], correct: "Bruxelles"},
+            {q: "Quel volcan actif se trouve en Sicile ?", options: ["Vésuve", "Stromboli", "Etna", "Teide"], correct: "Etna"},
+            {q: "Quelle mer borde l'Europe du Nord ?", options: ["Noire", "Rouge", "du Nord", "Adriatique"], correct: "du Nord"},
+            {q: "Quel pays a 3 langues officielles (FR, NL, DE) ?", options: ["Belgique", "Suisse", "Luxembourg", "Autriche"], correct: "Belgique"},
+            {q: "Quelle capitale est traversée par le Tibre ?", options: ["Paris", "Madrid", "Rome", "Londres"], correct: "Rome"},
+            {q: "Quel pays est connu pour ses fjords ?", options: ["Suède", "Norvège", "Finlande", "Islande"], correct: "Norvège"},
+            {q: "Laquelle est une île méditerranéenne française ?", options: ["Sicile", "Malte", "Corse", "Sardaigne"], correct: "Corse"},
+            {q: "Quel pays a rejoint l'UE en 2013 ?", options: ["Pologne", "Croatie", "Bulgarie", "Roumanie"], correct: "Croatie"},
+            {q: "Quel climat domine à l'Ouest (Bretagne, Irlande) ?", options: ["Continental", "Océanique", "Montagnard", "Sec"], correct: "Océanique"},
+            {q: "Quel pays a le PIB/habitant le plus élevé de l'UE ?", options: ["France", "Allemagne", "Luxembourg", "Irlande"], correct: "Luxembourg"},
+            {q: "Quel est le plus haut sommet des Alpes ?", options: ["Mont Blanc", "Mont Rose", "Matterhorn", "Jungfrau"], correct: "Mont Blanc"},
+            {q: "Quel détroit sépare l'Espagne du Maroc ?", options: ["Bosphore", "Gibraltar", "Sicile", "Pas-de-Calais"], correct: "Gibraltar"}
+        ],
+        libre: [
+            {q: "L'UE compte ___ pays depuis le Brexit.", answer: "27", alternatives: ["vingt-sept"]},
+            {q: "La capitale de l'Allemagne est ___.", answer: "Berlin", alternatives: ["berlin"]},
+            {q: "Le ___ traverse Vienne et Budapest.", answer: "Danube", alternatives: ["danube"]},
+            {q: "La capitale de l'Espagne est ___.", answer: "Madrid", alternatives: ["madrid"]},
+            {q: "La capitale de l'Italie est ___.", answer: "Rome", alternatives: ["rome"]},
+            {q: "L'___ sépare l'Europe de l'Asie.", answer: "Oural", alternatives: ["oural"]},
+            {q: "La capitale de la Pologne est ___.", answer: "Varsovie", alternatives: ["varsovie"]},
+            {q: "La ___ est connue pour ses fjords.", answer: "Norvège", alternatives: ["norvege"]},
+            {q: "La monnaie de la Pologne est le ___.", answer: "zloty", alternatives: ["Zloty"]},
+            {q: "Le siège de l'UE est à ___.", answer: "Bruxelles", alternatives: ["bruxelles"]},
+            {q: "La ___ a rejoint l'UE en 2013.", answer: "Croatie", alternatives: ["croatie"]},
+            {q: "L'___ est le volcan de Sicile.", answer: "Etna", alternatives: ["etna"]},
+            {q: "La mer ___ borde l'Allemagne au Nord.", answer: "du Nord", alternatives: ["du nord"]},
+            {q: "Le climat ___ domine à Bordeaux et Londres.", answer: "océanique", alternatives: ["oceanique"]},
+            {q: "La ___ a trois langues officielles.", answer: "Belgique", alternatives: ["belgique"]},
+            {q: "L'___ est le plus grand pays entièrement en Europe.", answer: "Ukraine", alternatives: ["ukraine"]},
+            {q: "Le ___ est le sommet d'Europe (4808m).", answer: "Mont Blanc", alternatives: ["mont blanc"]},
+            {q: "La ___ est l'île française en Méditerranée.", answer: "Corse", alternatives: ["corse"]},
+            {q: "Le fleuve de Londres est la ___.", answer: "Tamise", alternatives: ["tamise"]},
+            {q: "La capitale du Portugal est ___.", answer: "Lisbonne", alternatives: ["lisbonne"]}
+        ]
+    },
+    3: {
+        qcm: [
+            {q: "Quel est le plus grand continent ?", options: ["Afrique", "Asie", "Amérique", "Europe"], correct: "Asie"},
+            {q: "Quel est le plus grand océan ?", options: ["Atlantique", "Indien", "Pacifique", "Arctique"], correct: "Pacifique"},
+            {q: "Quel est le plus haut sommet du monde ?", options: ["K2", "Everest", "Annapurna", "Lhotse"], correct: "Everest"},
+            {q: "Quel pays est le plus peuplé en 2023 ?", options: ["Chine", "Inde", "USA", "Indonésie"], correct: "Inde"},
+            {q: "Quel désert est le plus grand du monde ?", options: ["Gobi", "Sahara", "Namib", "Atacama"], correct: "Sahara"},
+            {q: "Quel pays est le plus vaste au monde ?", options: ["Canada", "Chine", "Russie", "USA"], correct: "Russie"},
+            {q: "Quel fleuve est le plus long du monde ?", options: ["Amazone", "Nil", "Yangtsé", "Mékong"], correct: "Nil"},
+            {q: "Dans quel pays est le Kilimandjaro ?", options: ["Kenya", "Tanzanie", "Éthiopie", "Ouganda"], correct: "Tanzanie"},
+            {q: "Quelle fosse est la plus profonde ?", options: ["Mariannes", "Java", "Porto Rico", "Tonga"], correct: "Mariannes"},
+            {q: "Quel canal relie l'Atlantique au Pacifique ?", options: ["Suez", "Panama", "Corinthe", "Kiel"], correct: "Panama"},
+            {q: "Quel est le pays le plus vaste d'Amérique du Sud ?", options: ["Argentine", "Brésil", "Chili", "Pérou"], correct: "Brésil"},
+            {q: "Quel continent est au pôle Sud ?", options: ["Arctique", "Antarctique", "Océanie", "Groenland"], correct: "Antarctique"},
+            {q: "Quel méridien est à 0° ?", options: ["Paris", "Greenwich", "Équateur", "Tropique"], correct: "Greenwich"},
+            {q: "L'Indonésie est un archipel de combien d'îles ?", options: ["1 000", "5 000", "17 000", "30 000"], correct: "17 000"},
+            {q: "Quel océan borde l'Australie à l'Est ?", options: ["Indien", "Pacifique", "Atlantique", "Austral"], correct: "Pacifique"},
+            {q: "Quel pays a la plus grande forêt tropicale ?", options: ["Congo", "Indonésie", "Brésil", "Australie"], correct: "Brésil"},
+            {q: "Quel parallèle est à 0° ?", options: ["Greenwich", "Équateur", "Cancer", "Capricorne"], correct: "Équateur"},
+            {q: "Quel pays d'Afrique est traversé par le Nil ?", options: ["Maroc", "Égypte", "Sénégal", "Angola"], correct: "Égypte"},
+            {q: "Quel continent est le moins peuplé ?", options: ["Océanie", "Europe", "Antarctique", "Amérique"], correct: "Antarctique"},
+            {q: "Quel pays n'est pas dans l'UE mais a l'euro ?", options: ["Suisse", "Monaco", "Norvège", "Islande"], correct: "Monaco"}
+        ],
+        libre: [
+            {q: "Le plus grand continent est l'___.", answer: "Asie", alternatives: ["asie"]},
+            {q: "L'océan le plus vaste est le ___.", answer: "Pacifique", alternatives: ["pacifique"]},
+            {q: "Le sommet du monde est l'___.", answer: "Everest", alternatives: ["everest"]},
+            {q: "Le pays le plus peuplé est l'___.", answer: "Inde", alternatives: ["inde"]},
+            {q: "Le désert le plus vaste est le ___.", answer: "Sahara", alternatives: ["sahara"]},
+            {q: "Le plus grand pays est la ___.", answer: "Russie", alternatives: ["russie"]},
+            {q: "Le fleuve le plus long est le ___.", answer: "Nil", alternatives: ["nil"]},
+            {q: "Le Kilimandjaro est en ___.", answer: "Tanzanie", alternatives: ["tanzanie"]},
+            {q: "Le point profond est la fosse des ___.", answer: "Mariannes", alternatives: ["mariannes"]},
+            {q: "Le canal de ___ relie deux océans.", answer: "Panama", alternatives: ["panama"]},
+            {q: "Le ___ est le plus vaste d'Amérique du Sud.", answer: "Brésil", alternatives: ["bresil"]},
+            {q: "Le pôle Sud est l'___.", answer: "Antarctique", alternatives: ["antarctique"]},
+            {q: "Le méridien de ___ est à 0°.", answer: "Greenwich", alternatives: ["greenwich"]},
+            {q: "L'___ est un archipel de 17 000 îles.", answer: "Indonésie", alternatives: ["indonesie"]},
+            {q: "La ligne imaginaire à 0° est l'___.", answer: "Équateur", alternatives: ["equateur"]},
+            {q: "Le Caire est traversé par le ___.", answer: "Nil", alternatives: ["nil"]},
+            {q: "La capitale du Japon est ___.", answer: "Tokyo", alternatives: ["tokyo"]},
+            {q: "L'Amazonie est principalement au ___.", answer: "Brésil", alternatives: ["bresil"]},
+            {q: "Le pays des pharaons est l'___.", answer: "Égypte", alternatives: ["egypte"]},
+            {q: "L'___ n'a pas d'habitants permanents.", answer: "Antarctique", alternatives: ["antarctique"]}
+        ]
+    },
+    4: {
+        qcm: [
+            {q: "Que signifie IDH ?", options: ["Indice de Développement Humain", "Indice de Densité", "Indice d'Habitation", "Indice d'Hydratation"], correct: "Indice de Développement Humain"},
+            {q: "Quel indicateur mesure la richesse par personne ?", options: ["PIB total", "IDH", "PIB/habitant", "Fécondité"], correct: "PIB/habitant"},
+            {q: "Quel pays a l'IDH le plus élevé ?", options: ["France", "USA", "Norvège", "Chine"], correct: "Norvège"},
+            {q: "Quel groupe réunit le Brésil, l'Inde et la Chine ?", options: ["G7", "BRICS", "OTAN", "UE"], correct: "BRICS"},
+            {q: "Combien d'ODD ont été fixés par l'ONU ?", options: ["5", "10", "17", "25"], correct: "17"},
+            {q: "Quel pays est le 1er émetteur de CO2 ?", options: ["USA", "Chine", "Inde", "Russie"], correct: "Chine"},
+            {q: "Quelle part de la population vit dans l'extrême pauvreté ?", options: ["2%", "9%", "20%", "40%"], correct: "9%"},
+            {q: "Quel continent a la croissance démographique la plus forte ?", options: ["Asie", "Europe", "Afrique", "Amérique"], correct: "Afrique"},
+            {q: "Quelle organisation aide les pays endettés ?", options: ["OMS", "UNESCO", "FMI", "Interpol"], correct: "FMI"},
+            {q: "Quel pays a l'espérance de vie la plus longue ?", options: ["Japon", "France", "USA", "Mexique"], correct: "Japon"},
+            {q: "Quel est le pays africain le plus peuplé ?", options: ["Égypte", "Nigeria", "Éthiopie", "Congo"], correct: "Nigeria"},
+            {q: "Quel pays européen a le PIB/habitant le plus haut ?", options: ["Allemagne", "Luxembourg", "Espagne", "Grèce"], correct: "Luxembourg"},
+            {q: "Quel indicateur mesure les naissances pour 1000 hab ?", options: ["Mortalité", "Natalité", "Fécondité", "Croissance"], correct: "Natalité"},
+            {q: "Dans les pays riches, l'alphabétisation est de ___ ?", options: ["70%", "80%", "90%", "99%"], correct: "99%"},
+            {q: "Quelle part de richesse ont les 10% les plus riches ?", options: ["40%", "76%", "90%", "99%"], correct: "76%"},
+            {q: "Le Brésil fait partie de quel groupe ?", options: ["G7", "BRICS", "UE", "Commonwealth"], correct: "BRICS"},
+            {q: "L'IDH varie entre quelles valeurs ?", options: ["0 et 10", "0 et 100", "0 et 1", "-1 et 1"], correct: "0 et 1"},
+            {q: "Quel pays a l'IDH le plus bas ?", options: ["Niger", "Soudan du Sud", "Tchad", "Mali"], correct: "Soudan du Sud"},
+            {q: "Quelle part du mix mondial est renouvelable ?", options: ["5%", "15%", "30%", "50%"], correct: "15%"},
+            {q: "La Chine produit quelle part du CO2 mondial ?", options: ["10%", "20%", "30%", "50%"], correct: "30%"}
+        ],
+        libre: [
+            {q: "L'___ signifie Indice de Développement Humain.", answer: "IDH", alternatives: ["idh"]},
+            {q: "Le pays avec l'IDH le plus haut est la ___.", answer: "Norvège", alternatives: ["norvege"]},
+            {q: "Le groupe des pays émergents est le ___.", answer: "BRICS", alternatives: ["brics"]},
+            {q: "L'ONU a fixé 17 ___ de Développement Durable.", answer: "Objectifs", alternatives: ["objectifs"]},
+            {q: "Le pays le plus peuplé d'Afrique est le ___.", answer: "Nigeria", alternatives: ["nigeria"]},
+            {q: "Le pays leader de l'espérance de vie est le ___.", answer: "Japon", alternatives: ["japon"]},
+            {q: "L'émetteur n°1 de CO2 est la ___.", answer: "Chine", alternatives: ["chine"]},
+            {q: "Le ___ prête de l'argent aux pays en crise.", answer: "FMI", alternatives: ["fmi"]},
+            {q: "La richesse par personne est le ___/habitant.", answer: "PIB", alternatives: ["pib"]},
+            {q: "Le taux de ___ mesure les naissances.", answer: "natalité", alternatives: ["natalite"]},
+            {q: "Le PIB le plus haut de l'UE est au ___.", answer: "Luxembourg", alternatives: ["luxembourg"]},
+            {q: "L'IDH le plus bas est au ___ du Sud.", answer: "Soudan", alternatives: ["soudan"]},
+            {q: "Le PIB par ___ mesure la richesse moyenne.", answer: "habitant", alternatives: ["habitant"]},
+            {q: "La population de l'___ va doubler d'ici 2050.", answer: "Afrique", alternatives: ["afrique"]},
+            {q: "La ___ est le seul pays sud-américain des BRICS.", answer: "Brésil", alternatives: ["bresil"]},
+            {q: "Les énergies ___ font 15% du mix mondial.", answer: "renouvelables", alternatives: ["renouvelables"]},
+            {q: "Le taux d'___ est de 99% en France.", answer: "alphabétisation", alternatives: ["alphabetisation"]},
+            {q: "10% des gens ont ___% de la richesse mondiale.", answer: "76", alternatives: ["soixante-seize"]},
+            {q: "L'IDH max est de ___.", answer: "1", alternatives: ["un"]},
+            {q: "La Chine émet ___% du CO2 mondial.", answer: "30", alternatives: ["trente"]}
+        ]
+    },
+    5: {
+        qcm: [
+            {q: "De combien la Terre a-t-elle chauffé depuis 1850 ?", options: ["+0,5°C", "+1,1°C", "+2°C", "+5°C"], correct: "+1,1°C"},
+            {q: "Quel est l'objectif de l'Accord de Paris ?", options: ["+1,5°C", "+3°C", "0°C", "-1°C"], correct: "+1,5°C"},
+            {q: "Quel gaz est le principal responsable ?", options: ["Oxygène", "Azote", "CO2", "Hélium"], correct: "CO2"},
+            {q: "Quelle année fut la plus chaude ?", options: ["2010", "2015", "2020", "2023"], correct: "2023"},
+            {q: "Quelle forêt perd 10 000 km² par an ?", options: ["Congo", "Amazonie", "Landes", "Taïga"], correct: "Amazonie"},
+            {q: "Quel pays est leader du solaire ?", options: ["Allemagne", "USA", "Chine", "Inde"], correct: "Chine"},
+            {q: "Quel barrage est le plus puissant ?", options: ["Hoover", "Trois-Gorges", "Assouan", "Itaipu"], correct: "Trois-Gorges"},
+            {q: "Combien de gens n'ont pas d'eau potable ?", options: ["100 M", "500 M", "1 Md", "2,2 Md"], correct: "2,2 Md"},
+            {q: "Quel pays utilise la géothermie à 90% ?", options: ["Japon", "Islande", "Italie", "Kenya"], correct: "Islande"},
+            {q: "Quelle COP a acté la sortie des fossiles ?", options: ["COP21", "COP26", "COP27", "COP28"], correct: "COP28"},
+            {q: "Quelle part de nourriture est gaspillée ?", options: ["10%", "20%", "33%", "50%"], correct: "33%"},
+            {q: "Quel insecte pollinisateur décline massivement ?", options: ["Mouche", "Abeille", "Fourmi", "Criquet"], correct: "Abeille"},
+            {q: "Quel rapport alerte sur l'extinction des espèces ?", options: ["GIEC", "IPBES", "OMS", "OMC"], correct: "IPBES"},
+            {q: "Quel protocole a sauvé la couche d'ozone ?", options: ["Kyoto", "Montréal", "Paris", "Rio"], correct: "Montréal"},
+            {q: "Quelle part du bio dans l'agriculture mondiale ?", options: ["2%", "10%", "20%", "50%"], correct: "2%"},
+            {q: "Quelle menace pèse sur les Maldives ?", options: ["Froid", "Sécheresse", "Montée des eaux", "Volcans"], correct: "Montée des eaux"},
+            {q: "Combien d'espèces sont menacées (IPBES) ?", options: ["10 000", "100 000", "1 million", "10 millions"], correct: "1 million"},
+            {q: "Où se trouve le barrage des Trois-Gorges ?", options: ["Inde", "Brésil", "Chine", "Égypte"], correct: "Chine"},
+            {q: "Quel gaz est le méthane (CH4) ?", options: ["Gaz rare", "Gaz à effet de serre", "Gaz respirable", "Gaz inerte"], correct: "Gaz à effet de serre"},
+            {q: "Le GIEC étudie quoi ?", options: ["Économie", "Climat", "Santé", "Espace"], correct: "Climat"}
+        ],
+        libre: [
+            {q: "La Terre a chauffé de ___°C.", answer: "1,1", alternatives: ["1.1"]},
+            {q: "L'Accord de ___ (2015) vise +1,5°C.", answer: "Paris", alternatives: ["paris"]},
+            {q: "Le principal gaz responsable est le ___-.", answer: "CO2", alternatives: ["co2"]},
+            {q: "L'année ___ fut la plus chaude enregistrée.", answer: "2023", alternatives: ["2023"]},
+            {q: "La déforestation frappe surtout l'___.", answer: "Amazonie", alternatives: ["amazonie"]},
+            {q: "L'___ chauffe 90% de ses maisons par géothermie.", answer: "Islande", alternatives: ["islande"]},
+            {q: "Le barrage le plus puissant est en ___.", answer: "Chine", alternatives: ["chine"]},
+            {q: "___ milliards de gens manquent d'eau sûre.", answer: "2,2", alternatives: ["2.2"]},
+            {q: "La COP___ a parlé de sortie des fossiles.", answer: "28", alternatives: ["28"]},
+            {q: "On gaspille ___% de la nourriture mondiale.", answer: "33", alternatives: ["trente-trois"]},
+            {q: "L'___ est vitale pour la pollinisation.", answer: "abeille", alternatives: ["abeille"]},
+            {q: "Le rapport ___ alerte sur l'extinction.", answer: "IPBES", alternatives: ["ipbes"]},
+            {q: "Le Protocole de ___ a sauvé l'ozone.", answer: "Montréal", alternatives: ["montreal"]},
+            {q: "Le bio représente ___% du mondial.", answer: "2", alternatives: ["deux"]},
+            {q: "Le GIEC étudie le changement ___.", answer: "climatique", alternatives: ["climatique"]},
+            {q: "La montée des ___ menace les Maldives.", answer: "eaux", alternatives: ["eaux"]},
+            {q: "Il y a 1 ___ d'espèces menacées.", answer: "million", alternatives: ["million"]},
+            {q: "La Chine est leader du panneau ___.", answer: "solaire", alternatives: ["solaire"]},
+            {q: "Le barrage des ___-Gorges est en Chine.", answer: "Trois", alternatives: ["3"]},
+            {q: "Le gaz CH4 est le ___.", answer: "méthane", alternatives: ["methane"]}
+        ]
+    }
+};
+
+let state = {
+    player: null,
+    currentLevel: null,
+    currentQuestions: [],
+    index: 0,
+    score: 0,
+    timer: null,
+    timeLeft: 20
+};
+
+function loadPlayer() {
+    let players = JSON.parse(localStorage.getItem(SUBJECT_DATA.config.storageKey)) || {};
+    let name = new URLSearchParams(window.location.search).get('player') || "Explorateur";
+    
+    if (!players[name]) {
+        players[name] = { name: name, levelReached: 1 };
+        localStorage.setItem(SUBJECT_DATA.config.storageKey, JSON.stringify(players));
+    }
+    state.player = players[name];
+    document.getElementById('current-player-name').textContent = name;
+    renderLevels();
 }
 
 function renderLevels() {
-  const grid = document.getElementById('level-grid');
-  grid.innerHTML = "";
-  const p = getPlayers()[currentPlayerName];
-  // Boucle i <= 5 car tu as 5 niveaux dans ton bloc Géo
-  for (let i = 1; i <= 5; i++) {
-    const isLocked = i > p.currentLevel;
-    const btn = document.createElement('button');
-    btn.className = `btn ${isLocked ? 'btn-locked' : 'btn-primary'}`;
-    btn.style.opacity = isLocked ? "0.5" : "1";
-    btn.innerHTML = `Niveau ${i} ${p.completed.includes(i) ? '✅' : ''}`;
-    btn.onclick = () => { if(!isLocked) showLesson(i); };
-    grid.appendChild(btn);
-  }
+    const container = document.getElementById('levels-container');
+    container.innerHTML = '';
+    for (let i = 1; i <= 5; i++) {
+        const isLocked = i > state.player.levelReached;
+        const div = document.createElement('div');
+        div.className = `level-card ${isLocked ? 'locked' : 'active'}`;
+        div.innerHTML = `<h4>Niveau ${i}</h4>${isLocked ? '🔒' : '🔓'}`;
+        if (!isLocked) div.onclick = () => selectLevel(i);
+        container.appendChild(div);
+    }
 }
 
-function showLesson(lvl) {
-  currentLevel = lvl;
-  const lesson = LESSONS_DATA[lvl];
-  document.getElementById('lesson-title').textContent = lesson.title;
-  document.getElementById('lesson-content').innerHTML = `<p>${lesson.content}</p><br><button class="btn btn-primary" onclick="startQuiz()">🔥 Commencer le Quiz</button>`;
+function selectLevel(lvl) {
+    state.currentLevel = lvl;
+    const lesson = SUBJECT_DATA.lessons[lvl];
+    document.getElementById('lesson-title').textContent = lesson.t;
+    document.getElementById('lesson-text').textContent = lesson.c;
+    document.getElementById('lesson-display').style.display = 'block';
 }
 
 function startQuiz() {
-  sessionQuestions = QUESTIONS_DATA.filter(q => q.level === currentLevel).sort(() => 0.5 - Math.random()).slice(0, 10);
-  score = 0; qIdx = 0;
-  document.getElementById('setup-screen').style.display = 'none';
-  document.getElementById('quiz-screen').style.display = 'block';
-  displayQuestion();
+    const data = QUESTIONS_DB_GEO[state.currentLevel];
+    // On mélange QCM et Libres pour faire 10 questions au total
+    const pool = [
+        ...data.qcm.map(q => ({...q, type: 'qcm'})),
+        ...data.libre.map(q => ({...q, type: 'libre'}))
+    ];
+    state.currentQuestions = pool.sort(() => 0.5 - Math.random()).slice(0, 10);
+    state.index = 0;
+    state.score = 0;
+    
+    document.getElementById('main-menu').style.display = 'none';
+    document.getElementById('quiz-zone').style.display = 'block';
+    showQuestion();
 }
 
-function displayQuestion() {
-  const q = sessionQuestions[qIdx];
-  document.getElementById('progress-text').textContent = `Question ${qIdx + 1}/10`;
-  document.getElementById('question-text').textContent = q.question;
-  const container = document.getElementById('options-container');
-  container.innerHTML = "";
-  q.options.forEach(opt => {
-    const b = document.createElement('button');
-    b.className = 'option-btn';
-    b.textContent = opt;
-    b.onclick = () => {
-      if(opt === q.answer) score++;
-      qIdx++;
-      if(qIdx < 10) displayQuestion(); else finish();
-    };
-    container.appendChild(b);
-  });
+function showQuestion() {
+    if (state.index >= state.currentQuestions.length) return finishQuiz();
+    
+    const q = state.currentQuestions[state.index];
+    document.getElementById('progress').textContent = `Question ${state.index + 1}/10`;
+    document.getElementById('question-text').textContent = q.q;
+    
+    const list = document.getElementById('options-list');
+    const libre = document.getElementById('libre-zone');
+    list.innerHTML = '';
+    
+    if (q.type === 'qcm') {
+        libre.style.display = 'none';
+        list.style.display = 'block';
+        q.options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'option';
+            btn.textContent = opt;
+            btn.onclick = () => checkAnswer(opt, q.correct);
+            list.appendChild(btn);
+        });
+    } else {
+        list.style.display = 'none';
+        libre.style.display = 'block';
+        document.getElementById('answer-input').value = '';
+        document.getElementById('answer-input').focus();
+    }
+    
+    startTimer();
 }
 
-function finish() {
-  document.getElementById('quiz-screen').style.display = 'none';
-  document.getElementById('result-screen').style.display = 'block';
-  document.getElementById('result-score').textContent = `${score}/10`;
-  
-  if (score >= 8) {
-    const players = getPlayers();
-    const p = players[currentPlayerName];
-    if (!p.completed.includes(currentLevel)) p.completed.push(currentLevel);
-    if (currentLevel === p.currentLevel && p.currentLevel < 5) p.currentLevel++;
-    savePlayers(players);
-    document.getElementById('result-msg').textContent = "Bravo ! Niveau validé !";
-  } else {
-    document.getElementById('result-msg').textContent = "Retente ta chance pour obtenir 8/10 !";
-  }
+function checkLibre() {
+    const input = document.getElementById('answer-input').value.trim().toLowerCase();
+    const q = state.currentQuestions[state.index];
+    const isCorrect = input === q.answer.toLowerCase() || (q.alternatives && q.alternatives.some(a => a.toLowerCase() === input));
+    
+    if (isCorrect) state.score++;
+    next();
 }
 
-init();
+function checkAnswer(choice, correct) {
+    if (choice === correct) state.score++;
+    next();
+}
+
+function next() {
+    clearInterval(state.timer);
+    state.index++;
+    showQuestion();
+}
+
+function startTimer() {
+    state.timeLeft = 20;
+    document.getElementById('timer').textContent = `⏳ ${state.timeLeft}s`;
+    state.timer = setInterval(() => {
+        state.timeLeft--;
+        document.getElementById('timer').textContent = `⏳ ${state.timeLeft}s`;
+        if (state.timeLeft <= 0) next();
+    }, 1000);
+}
+
+function finishQuiz() {
+    document.getElementById('quiz-zone').style.display = 'none';
+    document.getElementById('result-screen').style.display = 'block';
+    document.getElementById('final-score').textContent = `${state.score}/10`;
+    
+    if (state.score >= 8) {
+        document.getElementById('result-status').textContent = "Niveau Réussi ! 🎉";
+        if (state.currentLevel === state.player.levelReached && state.player.levelReached < 5) {
+            state.player.levelReached++;
+            saveData();
+        }
+    } else {
+        document.getElementById('result-status').textContent = "Presque... Il faut 8/10 ! ✌️";
+    }
+}
+
+function saveData() {
+    let players = JSON.parse(localStorage.getItem(SUBJECT_DATA.config.storageKey));
+    players[state.player.name] = state.player;
+    localStorage.setItem(SUBJECT_DATA.config.storageKey, JSON.stringify(players));
+}
+
+loadPlayer();
 </script>
 </body>
 </html>
