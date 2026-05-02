@@ -849,9 +849,7 @@ const QUESTIONS_DB = {
             {q: "Le plus long fleuve du monde est le ___ (6 650 km).", answer: "Nil", alternatives: ["nil", "Nil"], explanation: "Débat avec l'Amazone selon les sources."},
             {q: "Le Nil traverse l'___ du sud au nord.", answer: "Égypte", alternatives: ["égypte", "Egypte", "egypte"], explanation: "Le Caire est sur ses rives."},
             {q: "L'___ est l'archipel le plus grand du monde (17 000 îles).", answer: "Indonésie", alternatives: ["indonésie", "Indonesie", "indonesie"], explanation: "Java, Sumatra, Bornéo, Bali..."},
-            {q: "Les ___ sont le troisième plus grand pays (9,8 M km²).", answer: "États-Unis", alternatives: ["états-unis", "Etats-Unis", "etats-unis", "USA", "usa", "Etats Unis", "etats unis", "Amérique", "amerique"], explanation
-Des 
-            {q: "Les ___ sont le troisième plus grand pays (9,8 M km²).", answer: "États-Unis", alternatives: ["états-unis", "Etats-Unis", "etats-unis", "USA", "usa", "Etats Unis", "etats unis", "Amérique", "amerique", "Etats-Unis d'Amerique"], explanation: "Troisième pays par la superficie."},
+            {q: "Les ___ sont le troisième plus grand pays (9,8 M km²).", answer: "États-Unis", alternatives: ["états-unis", "Etats-Unis", "etats-unis", "USA", "usa", "Etats Unis", "etats unis", "Amérique", "amerique"], explanation: "Troisième pays par la superficie."},
             {q: "Le continent le moins peuplé est l'___.", answer: "Antarctique", alternatives: ["antarctique", "Antarctique"], explanation: "Aucun habitant permanent."},
             {q: "___ utilise l'euro sans être membre de l'UE.", answer: "Monaco", alternatives: ["monaco", "Andorre", "andorre", "Saint-Marin", "saint-marin", "Vatican", "vatican", "Monténégro", "monténégro"], explanation: "Monaco, Andorre, Saint-Marin, Vatican, Monténégro."}
         ]
@@ -994,7 +992,10 @@ function closeNewPlayerModal(){
   document.getElementById("newPlayerModal").style.display="none";
 }
 function confirmNewPlayer(){
-  const name=document.getElementById("newPlayerNameModal").value;
+  /* Lit depuis la modale OU depuis le champ inline du header */
+  const modal=document.getElementById("newPlayerNameModal");
+  const inline=document.getElementById("newPlayerName");
+  const name=(modal&&modal.value&&modal.value.trim())?modal.value:(inline?inline.value:"");
   if(!name||!name.trim()){closeNewPlayerModal();return;}
   const n=name.trim();
   const players=getPlayers();
@@ -1250,7 +1251,7 @@ function validateAnswer(){
     const inp=document.getElementById("answerInput");
     userAnswer=inp.value.trim();
     if(!userAnswer){showToast("Écris ta réponse !");return;}
-const normalize=s=>s.toLowerCase().replace(/['’‘`´]/g,'').replace(/[.,;:!?]/g,'').replace(/\s+/g,' ').trim();
+const normalize=s=>s.toLowerCase().replace(/[\u2019\u2018']/g,'').replace(/[.,;:!?]/g,'').replace(/\s+/g,' ').trim();
 const clean=normalize(userAnswer);
 const cc=normalize(q.answer);
     isCorrect=clean===cc;
