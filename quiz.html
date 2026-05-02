@@ -233,6 +233,7 @@ text-align: center;
 word-break: break-word;
 }
 
+```
 /* Tableau complet : défilement horizontal si nécessaire */
 .lesson-table,
 #lessonIntroContent .lesson-table {
@@ -240,6 +241,7 @@ word-break: break-word;
     overflow-x: auto;
     display: block;
 }
+```
 
 }
 /* fin de modif des affichages pour écran petits  */
@@ -370,9 +372,11 @@ style="background:#f5e8ff;color:#553c9a">📖 Lexique</button>
 
   <!-- changement  pour affichage aéré fin -->
 
+```
 <div style="font-size:3em;margin-bottom:10px">📚</div>
 <h3 id="lessonIntroTitle" style="color:var(--primary);margin-bottom:8px"></h3>
 <p id="lessonIntroObj" style="color:#718096;margin-bottom:16px"></p>
+```
 
 <!-- changement  pour affichage aéré 2 -->
 
@@ -380,9 +384,11 @@ style="background:#f5e8ff;color:#553c9a">📖 Lexique</button>
 
   <!-- changement  pour affichage aéré fin -->
 
+```
 <a id="lessonIntroLexique" href="#" target="_blank" style="display:inline-block;margin-bottom:12px;color:var(--primary);font-weight:bold;text-decoration:none;border-bottom:1px dashed var(--primary)">📖 Voir le vocabulaire du niveau</a>
 <br>
 <button class="btn btn-primary" onclick="startQuestions()" style="padding:14px 32px;font-size:1.1em;border-radius:14px">🎮 C'est parti !</button>
+```
 
   </div>
 
@@ -391,7 +397,7 @@ style="background:#f5e8ff;color:#553c9a">📖 Lexique</button>
     <div class="question-text" id="questionText"></div>
     <div class="options-grid" id="qcmOptions" style="display:none"></div>
     <div id="libreInput" style="display:none">
-      <input type="text" class="answer-input" id="answerInput" placeholder="Tape ta réponse..." autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" onkeyup="if(event.key==='Enter')validateAnswer()">
+      <input type="text" class="answer-input" id="answerInput" placeholder="Tape ta réponse..." onkeyup="if(event.key==='Enter')validateAnswer()">
     </div>
     <div class="feedback" id="feedback">
       <div class="feedback-title" id="feedbackTitle"></div>
@@ -709,6 +715,10 @@ const LESSONS_DATA = [
     }
 ];
 
+// ═══════════════════════════════════════════════════════════════════
+// QUESTIONS_DB — 5 niveaux × (20 QCM + 20 libres) = 200 questions
+// ═══════════════════════════════════════════════════════════════════
+
 
 const QUESTIONS_DB = {
     1: {
@@ -953,12 +963,13 @@ const QUESTIONS_DB = {
 };
 
 
+// ═══════════════════════════════════════════════════════════════════
+// ÉTAT DU JEU
+// ═══════════════════════════════════════════════════════════════════
 let gameState = {
-  currentPlayer: null, currentLevel: 1, currentMode: "mixte",
-  questions: [], currentQuestionIndex: 0, score: 0, answers: [], selectedOption: null,
-  isAnswered: false  // ✅ À ajouter ici
+  currentPlayer:null, currentLevel:1, currentMode:"mixte",
+  questions:[], currentQuestionIndex:0, score:0, answers:[], selectedOption:null
 };
-   
 
 // ═══════════════════════════════════════════════════════════════════
 // GESTION JOUEURS
@@ -992,10 +1003,7 @@ function closeNewPlayerModal(){
   document.getElementById("newPlayerModal").style.display="none";
 }
 function confirmNewPlayer(){
-  /* Lit depuis la modale OU depuis le champ inline du header */
-  const modal=document.getElementById("newPlayerNameModal");
-  const inline=document.getElementById("newPlayerName");
-  const name=(modal&&modal.value&&modal.value.trim())?modal.value:(inline?inline.value:"");
+  const name=document.getElementById("newPlayerNameModal").value;
   if(!name||!name.trim()){closeNewPlayerModal();return;}
   const n=name.trim();
   const players=getPlayers();
@@ -1087,7 +1095,7 @@ function renderLevels(){
   const currentLvl=p?p.currentLevel:1;
   const completed=p?(p.completed||[]):[];
   let h="";
-  for(let i=1;i<=10;i++){
+  for(let i=1;i<=5;i++){
     const lv=QUESTIONS_DB[i];
     const isLocked=i>currentLvl&&!completed.includes(i);
     const isDone=completed.includes(i);
@@ -1194,8 +1202,7 @@ function shuffle(a){
   return arr;
 }
 function renderQuestion(){
-  const q = gameState.questions[gameState.currentQuestionIndex];
-  gameState.isAnswered = false;  // verrouillage pour eviter double clic comptage
+  const q=gameState.questions[gameState.currentQuestionIndex];
   const total=gameState.questions.length;
   const idx=gameState.currentQuestionIndex;
   document.getElementById("questionCounter").textContent="Q"+(idx+1)+"/"+total;
@@ -1212,8 +1219,7 @@ function renderQuestion(){
     document.getElementById("qcmOptions").style.display="grid";
     document.getElementById("libreInput").style.display="none";
     const g=document.getElementById("qcmOptions");
-    // ⬇️ CORRECTION : pas d'apostrophe dans l'onclick, on passe l'index
-    g.innerHTML=q.options.map((opt,i)=>`<button class="option-btn" onclick="selectOptionByIndex(${i})">${opt}</button>`).join("");
+    g.innerHTML=q.options.map(opt=>`<button class="option-btn" onclick="selectOption(this,'${opt.replace(/'/g,"\'")}')">　${opt}</button>`).join("");
   } else {
     document.getElementById("qcmOptions").style.display="none";
     document.getElementById("libreInput").style.display="block";
@@ -1222,41 +1228,32 @@ function renderQuestion(){
     setTimeout(()=>inp.focus(),100);
   }
 }
-function selectOptionByIndex(index){
-  const q=gameState.questions[gameState.currentQuestionIndex];
-  const val=q.options[index];
+function selectOption(btn,val){
   document.querySelectorAll(".option-btn").forEach(b=>b.classList.remove("selected"));
-  document.querySelectorAll(".option-btn")[index].classList.add("selected");
-  gameState.selectedOption=val;
+  btn.classList.add("selected"); gameState.selectedOption=val;
 }
-
 function validateAnswer(){
   const q=gameState.questions[gameState.currentQuestionIndex];
- //securiser comptes en bloquant double clic
-    if (gameState.isAnswered) return;
-    gameState.isAnswered = true;
-// fin securiser double clic pour eviter faux comptage 
-   let isCorrect=false; let userAnswer="";
+  let isCorrect=false; let userAnswer="";
   if(q.type==="qcm"){
     if(!gameState.selectedOption){showToast("Choisis une réponse !");return;}
     userAnswer=gameState.selectedOption;
     isCorrect=userAnswer===q.correct;
-    document.querySelectorAll(".option-btn").forEach((btn,idx)=>{
-    btn.disabled=true;
-  const v=q.options[idx]; // ⬅️ on prend la valeur depuis le tableau, pas le DOM
-  if(v===q.correct)btn.classList.add("correct");
-  else if(v===gameState.selectedOption&&!isCorrect)btn.classList.add("wrong");
-});
+    document.querySelectorAll(".option-btn").forEach(btn=>{
+      btn.disabled=true;
+      const v=btn.textContent.trim();
+      if(v===q.correct)btn.classList.add("correct");
+      else if(v===gameState.selectedOption&&!isCorrect)btn.classList.add("wrong");
+    });
   } else {
     const inp=document.getElementById("answerInput");
     userAnswer=inp.value.trim();
     if(!userAnswer){showToast("Écris ta réponse !");return;}
-const normalize=s=>s.toLowerCase().replace(/[\u2019\u2018']/g,'').replace(/[.,;:!?]/g,'').replace(/\s+/g,' ').trim();
-const clean=normalize(userAnswer);
-const cc=normalize(q.answer);
+const clean=userAnswer.toLowerCase().replace(/[.,;:!?']/g,"").replace(/\s+/g," ").trim();
+const cc=q.answer.toLowerCase().replace(/[.,;:!?']/g,"").replace(/\s+/g," ").trim();
     isCorrect=clean===cc;
     if(!isCorrect&&q.alternatives){
-  isCorrect=q.alternatives.some(a=>clean===normalize(a));
+  isCorrect=q.alternatives.some(a=>clean===a.toLowerCase().replace(/[.,;:!?']/g,"").replace(/\s+/g," ").trim());
     }
     inp.disabled=true; inp.className="answer-input "+(isCorrect?"correct":"wrong");
   }
@@ -1338,30 +1335,14 @@ function saveActiveSession(){
 }
 // Fin Sauvegarde session en cours
 
-//function nextQuestion(){
-  //if(gameState.currentQuestionIndex>=gameState.questions.length-1) showResults();
-  //else{gameState.currentQuestionIndex++; renderQuestion();}
-// }
-
-   function nextQuestion() {
-  if (gameState.currentQuestionIndex >= gameState.questions.length - 1) {
-    showResults();
-    return;
-  }
-  gameState.currentQuestionIndex++;
-  renderQuestion();
+function nextQuestion(){
+  if(gameState.currentQuestionIndex>=gameState.questions.length-1) showResults();
+  else{gameState.currentQuestionIndex++; renderQuestion();}
 }
-
-   
 function showResults(){
   const total=gameState.questions.length;
-  //const correct=gameState.answers.filter(a=>a.isCorrect).length;
-  //const pct=Math.round(correct/total*100);
-   
-   // securiser le pourcebtage 
-   const correct = Math.min(gameState.answers.filter(a => a.isCorrect).length, total);
-   const pct = Math.round((correct / total) * 100);
-
+  const correct=gameState.answers.filter(a=>a.isCorrect).length;
+  const pct=Math.round(correct/total*100);
   document.getElementById("resultPct").textContent=pct+"%";
   const msg=pct>=80?"🎉 Excellent ! Niveau suivant débloqué !":pct>=50?"👍 Pas mal ! Continue à t'entraîner.":"💪 Courage ! Relis la leçon et réessaie !";
   document.getElementById("resultMsg").textContent=msg+" ("+correct+"/"+total+" bonnes réponses)";
@@ -1389,7 +1370,7 @@ if(p){
  // ⬇️ sauvegarder quel que soit le score
     if(pct>=80){
       if(!p.completed.includes(gameState.currentLevel))p.completed.push(gameState.currentLevel);
-      if(p.currentLevel<=gameState.currentLevel&&gameState.currentLevel<10)p.currentLevel=gameState.currentLevel+1;
+      if(p.currentLevel<=gameState.currentLevel&&gameState.currentLevel<5)p.currentLevel=gameState.currentLevel+1;
       p.score=(p.score||0)+correct*10;
     }
     savePlayers(players);
@@ -1404,7 +1385,7 @@ function retryLevel(){startLevel(gameState.currentLevel);}
 function startNextLevel(){
   const players=getPlayers();
   const nlvl=players[gameState.currentPlayer]?players[gameState.currentPlayer].currentLevel:1;
-  if(nlvl<=10)startLevel(nlvl); else showToast("Félicitations ! Tu as tout terminé ! 🏆");
+  if(nlvl<=5)startLevel(nlvl); else showToast("Félicitations ! Tu as tout terminé ! 🏆");
 }
 function quitGame(){
 if(confirm("Quitter ? Ta progression sera sauvegardée et tu pourras la reprendre plus tard.")){
