@@ -744,7 +744,9 @@ function renderQuestion(){
     document.getElementById("qcmOptions").style.display="grid";
     document.getElementById("libreInput").style.display="none";
     const g=document.getElementById("qcmOptions");
-    g.innerHTML=q.options.map(opt=>`<button class="option-btn" onclick="selectOption(this,'${opt.replace(/'/g,"\'")}')">　${opt}</button>`).join("");
+    //correctif boutons inactufs 
+g.innerHTML=q.options.map((opt,i)=>`<button class="option-btn" onclick="selectOptionByIndex(${i})">${opt}</button>`).join("");
+//fin correctif boutons inactifs 
   } else {
     document.getElementById("qcmOptions").style.display="none";
     document.getElementById("libreInput").style.display="block";
@@ -753,10 +755,21 @@ function renderQuestion(){
     setTimeout(()=>inp.focus(),100);
   }
 }
-function selectOption(btn,val){
+
+//suite correcifs boutons inacyufs 
+function selectOptionByIndex(index){
+  const q=gameState.questions[gameState.currentQuestionIndex];
+  const val=q.options[index];
   document.querySelectorAll(".option-btn").forEach(b=>b.classList.remove("selected"));
-  btn.classList.add("selected"); gameState.selectedOption=val;
+  document.querySelectorAll(".option-btn")[index].classList.add("selected");
+  gameState.selectedOption=val;
 }
+//fin suite correctfs boutons inactufs 
+
+// function selectOption(btn,val){
+  // document.querySelectorAll(".option-btn").forEach(b=>b.classList.remove("selected"));
+  // btn.classList.add("selected"); gameState.selectedOption=val;
+// }
 function validateAnswer(){
   const q=gameState.questions[gameState.currentQuestionIndex];
   let isCorrect=false; let userAnswer="";
