@@ -744,9 +744,10 @@ function renderQuestion(){
     document.getElementById("qcmOptions").style.display="grid";
     document.getElementById("libreInput").style.display="none";
     const g=document.getElementById("qcmOptions");
-    //correctif boutons inactufs 
-g.innerHTML=q.options.map((opt,i)=>`<button class="option-btn" onclick="selectOptionByIndex(${i})">${opt}</button>`).join("");
-//fin correctif boutons inactifs 
+
+g.innerHTML=q.options.map(opt=>`<button class="option-btn" onclick="selectOption(this,'${opt.replace(/'/g,"\'")}')">　${opt}</button>`).join("");
+
+
   } else {
     document.getElementById("qcmOptions").style.display="none";
     document.getElementById("libreInput").style.display="block";
@@ -756,20 +757,11 @@ g.innerHTML=q.options.map((opt,i)=>`<button class="option-btn" onclick="selectOp
   }
 }
 
-//suite correcifs boutons inacyufs 
-function selectOptionByIndex(index){
-  const q=gameState.questions[gameState.currentQuestionIndex];
-  const val=q.options[index];
+function selectOption(btn,val){
   document.querySelectorAll(".option-btn").forEach(b=>b.classList.remove("selected"));
-  document.querySelectorAll(".option-btn")[index].classList.add("selected");
-  gameState.selectedOption=val;
+  btn.classList.add("selected"); gameState.selectedOption=val;
 }
-//fin suite correctfs boutons inactufs 
 
-// function selectOption(btn,val){
-  // document.querySelectorAll(".option-btn").forEach(b=>b.classList.remove("selected"));
-  // btn.classList.add("selected"); gameState.selectedOption=val;
-// }
 function validateAnswer(){
   const q=gameState.questions[gameState.currentQuestionIndex];
   let isCorrect=false; let userAnswer="";
@@ -1038,14 +1030,18 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // Fin init
-// FORCE JOUEUR PAR DÉFAUT iOS
-if (!localStorage.getItem(SUBJECT_CONFIG.playersKey)) {
-  const players = {"Joueur 1": {level:1, score:0, streak:0}};
-  localStorage.setItem(SUBJECT_CONFIG.playersKey, JSON.stringify(players));
+
+// 🔧 FIX BOUTONS INACTIFS iOS
+window.showSection = showSection;  // Force global
+window.switchPlayer = switchPlayer;
+
+if (!localStorage.getItem('geoMasterplayers')) {
+  const players = {"Joueur 1": {name:"Joueur 1", score:0}};
+  localStorage.setItem('geoMasterplayers', JSON.stringify(players));
   switchPlayer("Joueur 1");
-  updatePlayerDisplay();
-  populatePlayerSelect();
 }
+
+
 
 </script>
 
