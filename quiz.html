@@ -1038,6 +1038,14 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // Fin init
+// FORCE JOUEUR PAR DÉFAUT iOS
+if (!localStorage.getItem(SUBJECT_CONFIG.playersKey)) {
+  const players = {"Joueur 1": {level:1, score:0, streak:0}};
+  localStorage.setItem(SUBJECT_CONFIG.playersKey, JSON.stringify(players));
+  switchPlayer("Joueur 1");
+  updatePlayerDisplay();
+  populatePlayerSelect();
+}
 
 </script>
 
